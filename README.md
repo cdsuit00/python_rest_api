@@ -1,61 +1,58 @@
 # python_rest_api
-A minimal Flask REST API + CLI for managing inventory with OpenFoodFacts (OFF) integration. Uses a temporary in-memory list (no DB) to match assignment scope.
+A simple Flask REST API and CLI tool to manage an in-memory inventory.  
+Supports adding items, listing items, deleting items, and fetching product details from the OpenFoodFacts API.
 
-## Features
-- CRUD routes:
-  - `GET /inventory`
-  - `GET /inventory/<id>`
-  - `POST /inventory`
-  - `PATCH /inventory/<id>`
-  - `DELETE /inventory/<id>`
-- Helper routes:
-  - `GET /inventory/search?q=...` – local name contains
-  - `POST /inventory/import` – import from OFF by `barcode` or `name` then set local `price` & `stock`
-- External API:
-  - OFF **staging** by default (`world.openfoodfacts.net`) with Basic Auth `off/off`
-  - Barcode lookup via API v2
-  - Name search via v1 `search.pl`
-- CLI: add/list/get/update/delete; find+import from OFF
-- Tests: API, CLI, external API (pytest + unittest.mock)
+---
 
-## Install & Run (local venv)
-```bash
-python3 -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+## Installation & Setup
 
-# run the API (default: http://127.0.0.1:5000)
-export FLASK_APP=app.py
-flask run
+1. Clone this repository and navigate inside:
 
-Environment
-# OFF_ENV: staging (default) or production
-export OFF_ENV=staging
-# For staging, basic auth is required; default off:off is used automatically.
-# OFF_USER_AGENT is recommended (requests header)
-export OFF_USER_AGENT="InventoryDemo/1.0 (you@example.com)"
-# API_URL for CLI (default http://127.0.0.1:5000)
-export API_URL="http://127.0.0.1:5000"
+  git clone git@github.com:cdsuit00/python_rest_api.git
+  cd inventory_api
 
-CLI usage
-# list items
-python cli.py list
+2. Create and activate a virtual environment:
 
-# add item
-python cli.py add --name "Apple" --price 1.25 --stock 10
+  python3 -m venv venv
+  source venv/bin/activate   # Linux/Mac
+  venv\Scripts\activate      # Windows
 
-# get item
-python cli.py get <item_id>
+3. Install dependencies:
+  pip install -r requirements.txt
 
-# update price or stock
-python cli.py update <item_id> --price 1.5
-python cli.py update <item_id> --stock 20
+4. Running the Flask API
+   flask --app inventory_api.app run -- By default it runs on: http://127.0.0.1:5000
 
-# delete
-python cli.py delete <item_id>
 
-# find on OFF by barcode and import
-python cli.py find-off --barcode 3017624010701 --price 3.99 --stock 6
 
-# find on OFF by name and import (first match)
-python cli.py find-off --name "nutella" --price 4.49 --stock 4
+API Endpoints
+
+GET /inventory → List all items
+POST /inventory → Add a new item
+GET /inventory/<id> → Get item by ID
+DELETE /inventory/<id> → Delete item by ID
+POST /inventory/fetch/<barcode> → Fetch product from OpenFoodFacts and add it to inventory
+
+
+Using the CLI
+
+python -m inventory_api.cli [command] [options]
+
+Available Commands
+
+list → Show all items
+add <id> <name> <brand> [--price <price>] [--stock <stock>]
+get <id> → Get item by ID
+delete <id> → Remove item by ID
+find <barcode> → Fetch from OpenFoodFacts and add to inventory
+
+Examples
+# Add an item manually
+python -m inventory_api.cli add 101 "Chips" "SnackCo" --price 2.99 --stock 5
+
+# List items
+python -m inventory_api.cli list
+
+# Fetch from OpenFoodFacts by barcode
+python -m inventory_api.cli find 737628064502
+

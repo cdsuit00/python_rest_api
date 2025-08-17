@@ -1,5 +1,6 @@
 import click
 from inventory_api.storage import inventory, find_item_by_id
+from inventory_api.external_api import fetch_product_from_openfoodfacts
 
 @click.group()
 def cli():
@@ -51,6 +52,17 @@ def delete(item_id):
     else:
         inventory[:] = new_inv
         click.echo(f"Deleted item {item_id}")
+
+@cli.command()
+@click.argument("barcode")
+def find(barcode):
+    """Fetch product from OpenFoodFacts by barcode and add to inventory."""
+    product = fetch_product_from_openfoodfacts(barcode)
+    if not product:
+        click.echo("Product not found on OpenFoodFacts.")
+        return
+    inventory.append(product)
+    click.echo(f"Added {product['name']} ({barcode}) to inventory.")
 
 if __name__ == "__main__":
     cli()

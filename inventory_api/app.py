@@ -53,6 +53,15 @@ def fetch_from_external(barcode):
         return jsonify({"error": "Product not found"}), 404
     return jsonify(product), 200
 
+@app.route("/inventory/fetch/<barcode>", methods=["POST"])
+def fetch_and_add(barcode):
+    """Fetch from OpenFoodFacts and add to inventory."""
+    product = fetch_product_from_openfoodfacts(barcode)
+    if not product:
+        return jsonify({"error": "Product not found"}), 404
+
+    inventory.append(product)
+    return jsonify(product), 201
 
 if __name__ == "__main__":
     app.run(debug=True)
